@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1565C0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Ежедневник АН">
+<title>Ежедневник · АН</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,500;0,700;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--blue:#1565C0;--blue-dark:#0D47A1;--blue-light:#E3F0FF;--blue-mid:#1976D2;--txt:#1a1a2e;--dim:#78909C;--bg:#f0f4f8;--surf:#fff;--brd:#dde6f0;--fs:16px;--lh:1.75;--ff:'Roboto',sans-serif}
+body{background:var(--bg);color:var(--txt);font-family:var(--ff);min-height:100dvh;transition:background .3s,color .3s}
+
+/* ШАПКА — синяя как на сайте */
+.hdr{position:fixed;top:0;left:0;right:0;z-index:80;background:var(--blue);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(21,101,192,.3)}
+.hdr-left{display:flex;align-items:center;gap:12px}
+.hdr-name{color:#fff;font-size:16px;font-weight:500;line-height:1.2}
+.hdr-sub{color:rgba(255,255,255,.75);font-size:11px;margin-top:1px}
+.settings-btn{background:rgba(255,255,255,.15);border:none;border-radius:8px;width:38px;height:38px;cursor:pointer;color:#fff;display:flex;align-items:center;justify-content:center;transition:background .2s}
+.settings-btn:hover{background:rgba(255,255,255,.25)}
+
+/* ПРОГРЕСС */
+.bar{position:fixed;top:62px;left:0;right:0;height:3px;z-index:79;background:rgba(255,255,255,.5);transform-origin:left;transform:scaleX(0);transition:transform .1s linear}
+
+main{padding:66px 8px 80px}
+
+/* ДАТА */
+.date-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:0 2px}
+.date-pill{background:var(--blue);color:#fff;border-radius:20px;padding:4px 12px;font-size:12px;font-weight:500}
+.date-full{color:var(--dim);font-size:12px}
+
+/* КАРТОЧКА ЦИТАТЫ — синяя */
+.quote-card{background:var(--blue-dark);border-radius:12px;padding:12px 14px;margin-bottom:8px}
+.quote-label{font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:7px;font-weight:500}
+.quote-text{font-size:calc(var(--fs)*1.05);font-style:italic;color:#fff;line-height:1.5;font-weight:400}
+.quote-source{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:8px;font-weight:500}
+
+/* КАРТОЧКА ТЕКСТА */
+.body-card{background:var(--surf);border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.body-text{font-size:var(--fs);line-height:var(--lh);color:var(--txt)}
+.body-text p{margin-bottom:.75em}
+.body-text p:last-child{margin-bottom:0}
+
+/* КАРТОЧКА АФФИРМАЦИИ */
+.aff-card{background:var(--blue-light);border-radius:12px;padding:10px 14px;margin-bottom:8px;border-left:4px solid var(--blue)}
+.aff-label{font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--blue);margin-bottom:6px;font-weight:600}
+.aff-text{font-size:calc(var(--fs)*.95);font-style:italic;color:var(--blue-dark);line-height:1.5}
+
+/* КНОПКИ */
+.actions{display:flex;gap:8px;margin-bottom:8px}
+.act-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--surf);border:1px solid var(--brd);border-radius:10px;padding:10px;font-family:var(--ff);font-size:12px;color:var(--blue);cursor:pointer;transition:all .2s;font-weight:500}
+.act-btn:hover{background:var(--blue-light);border-color:var(--blue)}
+
+/* ЗАГРУЗКА */
+.loading{text-align:center;padding:60px 20px}
+.dots{display:flex;justify-content:center;gap:8px;margin-bottom:14px}
+.dots span{width:10px;height:10px;border-radius:50%;background:var(--blue);animation:bounce 1.2s ease-in-out infinite}
+.dots span:nth-child(2){animation-delay:.15s;opacity:.7}.dots span:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,80%,100%{transform:scale(.5);opacity:.3}40%{transform:scale(1);opacity:1}}
+.loading-txt{color:var(--dim);font-size:14px}
+
+/* ПАНЕЛЬ НАСТРОЕК */
+.ovl{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:opacity .3s}
+.ovl.on{opacity:1;pointer-events:all}
+.panel{position:fixed;bottom:0;left:0;right:0;z-index:100;background:#fff;border-radius:20px 20px 0 0;padding:0 18px 36px;transform:translateY(100%);transition:transform .35s cubic-bezier(.32,.72,0,1);box-shadow:0 -4px 24px rgba(0,0,0,.12)}
+.panel.on{transform:translateY(0)}
+.hdl{width:36px;height:4px;border-radius:2px;background:#dde;margin:12px auto 18px}
+.pt{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);font-weight:600;margin-bottom:20px}
+.sr{margin-bottom:20px}
+.sl{font-size:12px;color:var(--dim);margin-bottom:10px;display:flex;justify-content:space-between;font-weight:500}
+.sl span{color:var(--blue)}
+input[type=range]{width:100%;height:4px;-webkit-appearance:none;appearance:none;background:#dde6f0;border-radius:2px;outline:none;accent-color:var(--blue)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--blue);cursor:pointer;border:3px solid #fff;box-shadow:0 0 8px rgba(21,101,192,.4)}
+.chips{display:flex;gap:8px}
+.chip{flex:1;padding:8px 4px;border-radius:10px;border:1px solid var(--brd);background:none;color:var(--txt);cursor:pointer;transition:all .2s;text-align:center;font-size:13px;font-family:var(--ff)}
+.chip.on{background:var(--blue);color:#fff;border-color:var(--blue);font-weight:600}
+.sws{display:flex;gap:10px}
+.sw{width:44px;height:44px;border-radius:12px;cursor:pointer;border:2px solid transparent;display:flex;align-items:center;justify-content:center;font-size:18px;transition:all .2s}
+.sw.on{border-color:var(--blue);transform:scale(1.1)}
+
+/* ТОСТ */
+.toast{position:fixed;top:72px;left:50%;transform:translateX(-50%) translateY(-8px);background:var(--blue-dark);border-radius:20px;padding:8px 18px;font-size:12px;color:#fff;opacity:0;pointer-events:none;z-index:200;transition:all .3s;white-space:nowrap}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ТЕМЫ */
+body.sepia{--bg:#f5f0e8;--surf:#ede5d4;--brd:#d5c9b2;--txt:#2e2218;--dim:#8b7355;--blue:#8b6340;--blue-dark:#6b4c30;--blue-light:#f0e8d8;--blue-mid:#8b6340}
+body.night{--bg:#0d1117;--surf:#161b22;--brd:#21262d;--txt:#e6edf3;--dim:#7d8590;--blue:#388bfd;--blue-dark:#1f6feb;--blue-light:#1c2d3f;--blue-mid:#388bfd}
+body.forest{--bg:#0c1810;--surf:#12201a;--brd:#1c3025;--txt:#d0e8d4;--dim:#5a8a6a;--blue:#4caf70;--blue-dark:#2d7a4a;--blue-light:#1a3025;--blue-mid:#4caf70}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="toast" id="toast"></div>
+
+<header class="hdr">
+  <div class="hdr-left">
+    <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iNDQ4cHQiIGhlaWdodD0iNDQ3cHQiIHZpZXdCb3g9IjAgMCA0NDggNDQ3IiB2ZXJzaW9uPSIxLjEiPgo8ZyBpZD0ic3VyZmFjZTEiPjxyZWN0IHdpZHRoPSI0NDgiIGhlaWdodD0iNDQ3IiByeD0iODAiIGZpbGw9IndoaXRlIi8+CjxwYXRoIHN0eWxlPSIgc3Ryb2tlOm5vbmU7ZmlsbC1ydWxlOmV2ZW5vZGQ7ZmlsbDpyZ2IoMTAuNSUsMTEuOCUsNTQuMSUpO2ZpbGwtb3BhY2l0eToxOyIgZD0iTSAyODcuOTE3OTY5IDEwMC4zMzk4NDQgQyAzMDguNTQ2ODc1IDExMC45NzY1NjMgMzIyLjYxMzI4MSAxMjMuOTM3NSAzMzYuNTc4MTI1IDE0Mi4wNTQ2ODggQyAzNDUuNzQ2MDk0IDE1My45NTcwMzEgMzU0Ljc1IDE3Mi45NDUzMTMgMzU4LjUzOTA2MyAxODcuODcxMDk0IEMgMzU5Ljc2NTYyNSAxOTIuNjgzNTk0IDM2Mi4xNzU3ODEgMjAyLjE0MDYyNSAzNjIuMTg3NSAyMDYuODIwMzEzIEwgMjg3LjkxNzk2OSAyMDYuODIwMzEzIFogTSAyNDcuMjAzMTI1IDIwNi44MjAzMTMgTCAyMjMuMDQ2ODc1IDIwNi44MjAzMTMgTCAyMjMuMDQ2ODc1IDg0LjAxMTcxOSBMIDE4MS44ODY3MTkgODQuMDExNzE5IEwgMTgxLjg4NjcxOSAyMjIuMDM1MTU2IEMgMTgwLjM0NzY1NiAyMTkuNzAzMTI1IDE3OC43NzM0MzggMjE2LjAxNTYyNSAxNzcuNTIzNDM4IDIxMy40MjE4NzUgQyAxNzYuMTA1NDY5IDIxMC40ODA0NjkgMTc0LjU4NTkzOCAyMDcuNTQ2ODc1IDE3My4xMjEwOTQgMjA0LjYyNSBDIDE2NC4zNTE1NjMgMTg3LjEyMTA5NCAxNTUuNzUzOTA2IDE2OS4xNDQ1MzEgMTQ2Ljk4ODI4MSAxNTEuNTcwMzEzIEwgMTIwLjgxNjQwNiA5OC41NTA3ODEgQyAxMTcuOTI1NzgxIDkyLjc2OTUzMSAxMTUuMTkxNDA2IDg2LjUwMzkwNiAxMTIuMDg5ODQ0IDgwLjg3ODkwNiBDIDEwNS45ODQzNzUgODQuNjUyMzQ0IDkzLjcwMzEyNSA5Ny41MzUxNTYgODguNTM1MTU2IDEwMy4xODM1OTQgQyA4MS40MDIzNDQgMTEwLjk3MjY1NiA3NC41MTk1MzEgMTIwLjc1MzkwNiA2OS4wNzgxMjUgMTI5LjgwODU5NCBDIDU2LjI3MzQzOCAxNTEuMTE3MTg4IDQ5LjAwMzkwNiAxNzMuNjI1IDQ1LjUwMzkwNiAxOTguMTcxODc1IEMgNDEuNjE3MTg4IDIyNS40NTMxMjUgNDQuMzcxMDk0IDI1My4yNjk1MzEgNTIuOTUzMTI1IDI3OS4zODI4MTMgQyA1Ni41NzgxMjUgMjkwLjQyNTc4MSA2MS41MTE3MTkgMzAwLjg5NDUzMSA2Ny4xNzE4NzUgMzExLjAyMzQzOCBDIDY5Ljg1OTM3NSAzMTUuODM1OTM4IDcyLjkyOTY4OCAzMjAuNjMyODEzIDc2LjA4NTkzOCAzMjUuMTQ4NDM4IEMgNzkuMjM0Mzc1IDMyOS42NTYyNSA4Mi44OTA2MjUgMzMzLjkyOTY4OCA4NS45MTc5NjkgMzM4LjM1NTQ2OSBMIDE0My40MTAxNTYgMzM4LjM1NTQ2OSBDIDE0Mi40NTcwMzEgMzM2Ljk0NTMxMyAxMzYuMTU2MjUgMzMyLjQ4NDM3NSAxMzQuMzA0Njg4IDMzMC45MTAxNTYgQyA5NS40MzM1OTQgMjk3Ljg2MzI4MSA3OS4wMzUxNTYgMjUwLjE5MTQwNiA4Ni4zMzU5MzggMTk5LjYzMjgxMyBDIDg3LjU5NzY1NiAxOTAuODcxMDk0IDkwLjIxNDg0NCAxODEuODE2NDA2IDkzLjM1NTQ2OSAxNzMuNTQ2ODc1IEMgOTQuNTM5MDYzIDE3MC40MjU3ODEgMTAyLjQ4MDQ2OSAxNTIuMTMyODEzIDEwNC4wMzkwNjMgMTUwLjg5ODQzOCBDIDEwNSAxNTEuNjEzMjgxIDExNy4xMDkzNzUgMTc3LjU4OTg0NCAxMTguOTQ5MjE5IDE4MS4xNzE4NzUgQyAxMjQuMDk3NjU2IDE5MS4xOTUzMTMgMTI4LjczMDQ2OSAyMDEuNjQwNjI1IDEzMy44MjQyMTkgMjExLjcxMDkzOCBDIDE0NCAyMzEuODEyNSAxNTMuMzAwNzgxIDI1Mi41MzUxNTYgMTYzLjUzOTA2MyAyNzIuNTkzNzUgQyAxNzMuNzY1NjI1IDI5Mi42Mjg5MDYgMTgzLjE5MTQwNiAzMTMuMzM5ODQ0IDE5My4yMTA5MzggMzMzLjUxNTYyNSBDIDE5OC4yMTg3NSAzNDMuNjAxNTYzIDIwMy4wMTE3MTkgMzUzLjgwODU5NCAyMDguMDUwNzgxIDM2My44NjMyODEgQyAyMTEuMTQ4NDM4IDM3MC4wNDI5NjkgMjIwLjYwMTU2MyAzOTAuMzgyODEzIDIyMy4wNDY4NzUgMzk0LjI4MTI1IEwgMjIzLjA0Njg3NSAyNDQuNDAyMzQ0IEwgMjQ3LjIwMzEyNSAyNDQuNDAyMzQ0IEMgMjQ3LjIwMzEyNSAyNTMuNzczNDM4IDI0Ni43NSAzMzYuNjY3OTY5IDI0Ny4zODI4MTMgMzM4LjE3OTY4OCBDIDI0OC41OTc2NTYgMzM4LjY4NzUgMjgzLjQyMTg3NSAzMzguMzU1NDY5IDI4Ny45MTc5NjkgMzM4LjM1NTQ2OSBMIDI4Ny45MTc5NjkgMjQ0LjQwMjM0NCBMIDM2MS43MzgyODEgMjQ0LjQwMjM0NCBDIDM2MS43MzA0NjkgMjUwLjg2NzE4OCAzNTYuNDM3NSAyNjcuODg2NzE5IDM1My45NzI2NTYgMjc0LjQ0MTQwNiBDIDM0OC4xOTkyMTkgMjg5Ljc4MTI1IDMzNi4zNTE1NjMgMzA5LjE3OTY4OCAzMjQuNTU0Njg4IDMyMC42MzI4MTMgQyAzMTkuMzU5Mzc1IDMyNS42NzE4NzUgMzE1LjY0MDYyNSAzMjkuNTQyOTY5IDMwOS43NTc4MTMgMzM0LjAyMzQzOCBDIDMwOS4wMjM0MzggMzM0LjU4MjAzMSAzMDQuNjU2MjUgMzM3LjY3MTg3NSAzMDQuNzYxNzE5IDMzOC4xNTYyNSBDIDMwNi4wNDI5NjkgMzM4LjcyNjU2MyAzNTcuMTk5MjE5IDMzOC4zNTU0NjkgMzYzLjMwNDY4OCAzMzguMzU1NDY5IEMgMzgyLjUxOTUzMSAzMTYuNTk3NjU2IDM5Ny4xMjg5MDYgMjgyLjcxODc1IDQwMS42NDA2MjUgMjU0LjEwOTM3NSBDIDQwNy4zMTY0MDYgMjE4LjE1MjM0NCA0MDMuMTQ0NTMxIDE4My4xNzk2ODggMzg4LjE5NTMxMyAxNDkuOTQxNDA2IEMgMzYzLjAxNTYyNSA5My45Mzc1IDMwOC40NDkyMTkgNTIuNzA3MDMxIDI0Ny4yMDMxMjUgNDUuNTM1MTU2IEwgMjQ3LjIwMzEyNSAyMDYuODIwMzEzICIvPgo8cGF0aCBzdHlsZT0iIHN0cm9rZTpub25lO2ZpbGwtcnVsZTpldmVub2RkO2ZpbGw6cmdiKDEwLjUlLDExLjglLDU0LjElKTtmaWxsLW9wYWNpdHk6MTsiIGQ9Ik0gNDQyLjk0MTQwNiAyMjcuNDAyMzQ0IEMgNDQwLjQ4ODI4MSAzNDguNzEwOTM4IDM0MS4wOTc2NTYgNDQ0LjQ0MTQwNiAyMTkuNzUgNDQyLjM2MzI4MSBDIDk4LjYzNjcxOSA0NDAuMjg5MDYzIDIuNzg5MDYzIDMzOS44NzEwOTQgNC45NTcwMzEgMjE4Ljk2MDkzOCBDIDcuMTE3MTg4IDk4LjQzMzU5NCAxMDcuNzE4NzUgMS42OTkyMTkgMjI4LjI4NTE1NiA0LjI3MzQzOCBDIDM0OS4wMDM5MDYgNi44NDc2NTYgNDQ1LjM4NjcxOSAxMDYuNDgwNDY5IDQ0Mi45NDE0MDYgMjI3LjQwMjM0NCBaIE0gMjE0Ljc2OTUzMSAwLjM0NzY1NiBDIDkxLjYxMzI4MSA1LjE4MzU5NCAtNC4yNDYwOTQgMTA5LjQwMjM0NCAwLjg2NzE4OCAyMzIuNTU4NTk0IEMgNS45NzY1NjMgMzU1LjY5OTIxOSAxMDkuODg2NzE5IDQ1MS41MTE3MTkgMjMzLjEyNSA0NDYuNDQ5MjE5IEMgMzU2LjUxNTYyNSA0NDEuMzg2NzE5IDQ1MS45MjE4NzUgMzM3LjUyNzM0NCA0NDcuMDUwNzgxIDIxNC4xNDg0MzggQyA0NDIuMTc1NzgxIDkwLjcwMzEyNSAzMzguMDUwNzgxIC00LjQ5MjE4OCAyMTQuNzY5NTMxIDAuMzQ3NjU2ICIvPgo8cGF0aCBzdHlsZT0iIHN0cm9rZTpub25lO2ZpbGwtcnVsZTpldmVub2RkO2ZpbGw6cmdiKDEwLjUlLDExLjglLDU0LjElKTtmaWxsLW9wYWNpdHk6MTsiIGQ9Ik0gMjUuMjk2ODc1IDIyOC45Njg3NSBMIDI1LjI5Njg3NSAyMjUuMzkwNjI1IEMgMjUuMzIwMzEzIDE3MS43MDcwMzEgNDQuNzM4MjgxIDEyMi42MDU0NjkgODIuMjczNDM4IDg0LjE3MTg3NSBDIDExOC43NDIxODggNDYuODI0MjE5IDE2OC45NDE0MDYgMjUuNTU4NTk0IDIyMS4wNzgxMjUgMjQuNzI2NTYzIEMgMzMwLjEyODkwNiAyMi45ODQzNzUgNDIwLjY3MTg3NSAxMTAuNjIxMDk0IDQyMi41ODIwMzEgMjE5LjYyODkwNiBDIDQyNC41MDM5MDYgMzI5LjEzMjgxMyAzMzcuOTE3OTY5IDQxOS4xODc1IDIyOC41MzEyNSA0MjEuOTU3MDMxIEMgMTI3Ljg1NTQ2OSA0MjQuNTA3ODEzIDQxLjIzODI4MSAzNDkuOTkyMTg4IDI3LjM1OTM3NSAyNTEuNzM0Mzc1IEMgMjYuNDA2MjUgMjQ0Ljk2NDg0NCAyNS4yOTI5NjkgMjM1LjcxODc1IDI1LjI5Njg3NSAyMjguOTY4NzUgWiBNIDIxNi43ODEyNSAyMC40ODQzNzUgQyAxMDQuODYzMjgxIDI0LjUwMzkwNiAxNi43MTQ4NDQgMTE4LjM2NzE4OCAyMC45ODgyODEgMjMwLjU0Njg3NSBDIDI1LjI1IDM0Mi4zODY3MTkgMTE4Ljg1NTQ2OSA0MzAuNTAzOTA2IDIzMS4xMTMyODEgNDI2LjMyODEyNSBDIDM0My4yNDIxODggNDIyLjE1MjM0NCA0MzAuOTUzMTI1IDMyOC40NzY1NjMgNDI2LjkzNzUgMjE2LjE1NjI1IEMgNDIyLjkzMzU5NCAxMDQuMDA3ODEzIDMyOSAxNi40NDUzMTMgMjE2Ljc4MTI1IDIwLjQ4NDM3NSAiLz4KPHBhdGggc3R5bGU9IiBzdHJva2U6bm9uZTtmaWxsLXJ1bGU6ZXZlbm9kZDtmaWxsOnJnYigxMC41JSwxMS44JSw1NC4xJSk7ZmlsbC1vcGFjaXR5OjE7IiBkPSJNIDQwOC4yNjU2MjUgNDEzLjc0MjE4OCBDIDQwNy44MzIwMzEgNDExLjI0NjA5NCA0MDguNDYwOTM4IDQwNy4yOTI5NjkgNDA5LjY1MjM0NCA0MDUuMDYyNSBDIDQxMC44OTg0MzggNDAyLjczODI4MSA0MTMuMjg1MTU2IDQwMS4zODY3MTkgNDE1LjgzMjAzMSA0MDAuOTUzMTI1IEMgNDIxLjgyODEyNSAzOTkuOTI1NzgxIDQyNy4yMTA5MzggNDAyLjYxMzI4MSA0MjcuOTI5Njg4IDQwOS4wNzAzMTMgQyA0MjguNjIxMDk0IDQxNS4zMjgxMjUgNDI2Ljg5ODQzOCA0MjAuMzU1NDY5IDQyMC4zOTg0MzggNDIxLjg0NzY1NiBDIDQxNC4zNjMyODEgNDIzLjIzNDM3NSA0MDkuMzE2NDA2IDQxOS43MzQzNzUgNDA4LjI2NTYyNSA0MTMuNzQyMTg4IFogTSA0MTYuNzY1NjI1IDM5Ni4wNzAzMTMgQyA0MTQuNTM5MDYzIDM5Ni40NDE0MDYgNDEzLjk5NjA5NCAzOTUuOTkyMTg4IDQxMC44MDQ2ODggMzk3LjcxNDg0NCBDIDQwOS4wMTU2MjUgMzk4LjY3OTY4OCA0MDcuNzc3MzQ0IDM5OS42MjUgNDA2LjQyNTc4MSA0MDEuMTY0MDYzIEMgMzk3LjI3NzM0NCA0MTEuNTk3NjU2IDQwNS40MTc5NjkgNDI4LjE0NDUzMSA0MTkuODYzMjgxIDQyNi42Nzk2ODggQyA0MzMuMDAzOTA2IDQyNS4zNTE1NjMgNDM4LjcxMDkzOCA0MDkuMTgzNTk0IDQyOC4zNDc2NTYgMzk5LjcwMzEyNSBDIDQyNS4yODUxNTYgMzk2LjkwMjM0NCA0MjAuODM5ODQ0IDM5NS4zOTQ1MzEgNDE2Ljc2NTYyNSAzOTYuMDcwMzEzICIvPgo8cGF0aCBzdHlsZT0iIHN0cm9rZTpub25lO2ZpbGwtcnVsZTpldmVub2RkO2ZpbGw6cmdiKDEwLjUlLDExLjglLDU0LjElKTtmaWxsLW9wYWNpdHk6MTsiIGQ9Ik0gNDE4Ljk4MDQ2OSA0MDkuNDkyMTg4IEMgNDE4LjI2OTUzMSA0MDkuODU5Mzc1IDQxNy4wMjczNDQgNDA5LjcxODc1IDQxNi4wOTM3NSA0MDkuNjQ0NTMxIEwgNDE2LjA5Mzc1IDQwNi4xMDE1NjMgQyA0MTcuMTM2NzE5IDQwNS45NTcwMzEgNDE4LjQ3MjY1NiA0MDUuODM1OTM4IDQxOS4zMDg1OTQgNDA2LjM1OTM3NSBDIDQyMC4xMzY3MTkgNDA3LjA3MDMxMyA0MjAuMzI4MTI1IDQwNy4wNTQ2ODggNDIwLjM0NzY1NiA0MDguMTUyMzQ0IEMgNDIwLjEyMTA5NCA0MDguOTk2MDk0IDQxOS43NzczNDQgNDA5LjExNzE4OCA0MTguOTgwNDY5IDQwOS40OTIxODggWiBNIDQxMi4yOTY4NzUgNDE4Ljg4NjcxOSBMIDQxNi4xNzk2ODggNDE4LjgwNDY4OCBDIDQxNi41MDM5MDYgNDE2Ljg0NzY1NiA0MTYuMzMyMDMxIDQxNC44MjgxMjUgNDE2LjMyMDMxMyA0MTIuODQ3NjU2IEMgNDE3LjU2NjQwNiA0MTIuODQ3NjU2IDQxNy4yNTc4MTMgNDEyLjYzNjcxOSA0MTcuODUxNTYzIDQxMy43NzczNDQgTCA0MjAuNTcwMzEzIDQxOC44ODY3MTkgTCA0MjUuMDQ2ODc1IDQxOC44ODY3MTkgQyA0MjQuOTc2NTYzIDQxOC4wODU5MzggNDIyLjM0Mzc1IDQxMy4yMjY1NjMgNDIxLjc0NjA5NCA0MTIuNTY2NDA2IEMgNDIxLjc4OTA2MyA0MTIuNTQyOTY5IDQyMS44NTU0NjkgNDEyLjQ2ODc1IDQyMS44NzEwOTQgNDEyLjUwMzkwNiBDIDQyMS44OTA2MjUgNDEyLjU0Mjk2OSA0MjEuOTc2NTYzIDQxMi40NTMxMjUgNDIyIDQxMi40NDE0MDYgQyA0MjIuMTUyMzQ0IDQxMi4zNzEwOTQgNDIyLjI0NjA5NCA0MTIuMzMyMDMxIDQyMi40MjE4NzUgNDEyLjI0MjE4OCBDIDQyNS43MTA5MzggNDEwLjU4MjAzMSA0MjUuNTIzNDM4IDQwNS4xMzI4MTMgNDIyLjE3NTc4MSA0MDMuNjM2NzE5IEMgNDE5LjU3MDMxMyA0MDIuNDc2NTYzIDQxNS4xOTkyMTkgNDAyLjc4MTI1IDQxMi4yOTY4NzUgNDAyLjc4MTI1IEwgNDEyLjI5Njg3NSA0MTguODg2NzE5ICIvPgo8cGF0aCBzdHlsZT0iIHN0cm9rZTpub25lO2ZpbGwtcnVsZTpldmVub2RkO2ZpbGw6cmdiKDEwLjUlLDExLjglLDU0LjElKTtmaWxsLW9wYWNpdHk6MTsiIGQ9Ik0gNDE4Ljk4MDQ2OSA0MDkuNDkyMTg4IEwgNDE2LjMyMDMxMyA0MDkuNDkyMTg4IEwgNDE2LjMyMDMxMyA0MDYuMzU5Mzc1IEwgNDE5LjMwODU5NCA0MDYuMzU5Mzc1IEMgNDE4LjQ3MjY1NiA0MDUuODM1OTM4IDQxNy4xMzY3MTkgNDA1Ljk1NzAzMSA0MTYuMDkzNzUgNDA2LjEwMTU2MyBMIDQxNi4wOTM3NSA0MDkuNjQ0NTMxIEMgNDE3LjAyNzM0NCA0MDkuNzE4NzUgNDE4LjI2OTUzMSA0MDkuODU5Mzc1IDQxOC45ODA0NjkgNDA5LjQ5MjE4OCAiLz4KPC9nPgo8L3N2Zz4K" width="42" height="42" style="border-radius:50%;flex-shrink:0">
+    <div>
+      <div class="hdr-name">Ежедневник</div>
+      <div class="hdr-sub">Анонимные Наркоманы</div>
+    </div>
+  </div>
+  <div id="hdate" style="display:none"></div>
+  <button class="settings-btn" id="sbtn" onclick="openPanel()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+  </button>
+</header>
+
+<main id="main">
+  <div class="loading">
+    <div class="dots"><span></span><span></span><span></span></div>
+    <div class="loading-txt">Загружаем размышление на сегодня…</div>
+  </div>
+</main>
+
+<div class="ovl" id="ovl" onclick="closePanel()"></div>
+<div class="panel" id="panel">
+  <div class="hdl"></div>
+  <div class="pt">Настройки чтения</div>
+  <div class="sr"><div class="sl">Размер шрифта <span id="fsv">16px</span></div><input type="range" id="fsr" min="13" max="26" value="16" oninput="setFS(this.value)"></div>
+  <div class="sr"><div class="sl">Межстрочный интервал <span id="lhv">1.75</span></div><input type="range" id="lhr" min="1.3" max="2.4" step="0.05" value="1.75" oninput="setLH(this.value)"></div>
+  <div class="sr">
+    <div class="sl">Шрифт</div>
+    <div class="chips">
+      <button class="chip" id="f0" style="font-family:'Roboto',sans-serif" onclick="setFont(0,this)">Roboto</button>
+      <button class="chip" id="f1" style="font-family:Georgia,serif" onclick="setFont(1,this)">Georgia</button>
+      <button class="chip" id="f2" style="font-family:'Courier New',monospace;font-size:11px" onclick="setFont(2,this)">Mono</button>
+    </div>
+  </div>
+  <div class="sr">
+    <div class="sl">Тема</div>
+    <div class="sws">
+      <div class="sw" id="t0" style="background:#f0f4f8;border:1px solid #dde" onclick="setTheme(0,this)">☀️</div>
+      <div class="sw" id="t1" style="background:#f5f0e8" onclick="setTheme(1,this)">📜</div>
+      <div class="sw" id="t2" style="background:#0d1117" onclick="setTheme(2,this)">🌙</div>
+      <div class="sw" id="t3" style="background:#0c1810" onclick="setTheme(3,this)">🌿</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const MO=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+const DA=['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'];
+const FONTS=["'Roboto',sans-serif","Georgia,serif","'Courier New',monospace"];
+const THEMES=['','sepia','night','forest'];
+const d=new Date();
+const ds=`${d.getDate()} ${MO[d.getMonth()]}`;
+const df=`${DA[d.getDay()]}, ${d.getDate()} ${MO[d.getMonth()]} ${d.getFullYear()}`;
+
+const FALLBACK={
+  quote:"В мире творится какой-то хаос, и мне очень повезло, что я живу в спокойной атмосфере",
+  source:"Базовый текст, стр. 175",
+  body:["Иногда лучше не смотреть новости, потому что они пестрят историями о жестокости и хаосе. Во время употребления многие из нас привыкли к жестокости. В тумане активной зависимости нас редко волновало то, что происходит в мире.","Однако, оставаясь чистыми, многие из нас обнаружили, что мы чрезвычайно чувствительны к происходящему вокруг. Что мы, выздоравливающие люди, можем сделать, чтобы этот мир стал лучше?","Когда мы замечаем, что нас выводит из равновесия суматоха окружающей жизни, мы можем найти успокоение в молитве и медитации. Когда нам кажется, что все перевернулось вверх дном, наш контакт с Высшей Силой может стать островком умиротворения посреди любого шторма.","Сосредоточившись на нашем духовном пути, мы можем спокойно реагировать на все свои страхи. Живя в умиротворении, мы сами впускаем дух спокойствия в окружающий нас мир.","Как выздоравливающие люди мы можем способствовать положительным переменам, делая все возможное для применения принципов нашей программы."],
+  aff:"Я буду жить, говорить и действовать умиротворенно, созидая мир вокруг себя."
+};
+
+async function loadToday(){
+  const cacheKey='na_'+new Date().toISOString().slice(0,10);
+  const cached=localStorage.getItem(cacheKey);
+  if(cached){render(JSON.parse(cached));return;}
+
+  const proxies=[
+    'https://corsproxy.io/?url=',
+    'https://api.allorigins.win/raw?url=',
+    'https://api.codetabs.com/v1/proxy?quest=',
+    'https://thingproxy.freeboard.io/fetch/',
+    'https://proxy.cors.sh/',
+  ];
+  const url='https://na-russia.org/meditations';
+
+  for(const proxy of proxies){
+    try{
+      const res=await fetch(proxy+encodeURIComponent(url),{signal:AbortSignal.timeout(8000)});
+      if(!res.ok)continue;
+      const html=await res.text();
+      const parsed=parse(html);
+      if(parsed&&parsed.body.length>0){
+        localStorage.setItem(cacheKey,JSON.stringify(parsed));
+        for(const k of Object.keys(localStorage)){if(k.startsWith('na_cache_')||k.startsWith('na_2'))localStorage.removeItem(k);}
+        render(parsed);return;
+      }
+    }catch(e){continue;}
+  }
+
+  const keys=Object.keys(localStorage).filter(k=>k.startsWith('na_2')).sort();
+  if(keys.length>0){render(JSON.parse(localStorage.getItem(keys[keys.length-1])));showToast('Нет сети — показан последний текст');}
+  else render(FALLBACK);
+}
+
+function parse(html){
+  const doc=new DOMParser().parseFromString(html,'text/html');
+  ['script','style','nav','footer','header'].forEach(t=>doc.querySelectorAll(t).forEach(el=>el.remove()));
+  const raw=(doc.querySelector('main')||doc.body).textContent||'';
+  const lines=raw.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
+  const MOR=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+  const dateRe=new RegExp('^\\d{1,2}\\s+('+MOR.join('|')+')$','i');
+  let i=0,quote='',source='',body=[],aff='',title='';
+  while(i<lines.length&&!dateRe.test(lines[i]))i++;
+  i++;
+  if(i<lines.length&&lines[i].length<80&&!/^«/.test(lines[i]))title=lines[i++];
+  while(i<lines.length&&lines[i].length<5)i++;
+  if(i<lines.length)quote=lines[i++].replace(/^[«"']+|[»"']+$/g,'').trim();
+  if(i<lines.length&&lines[i].length<100&&!/[.!?]$/.test(lines[i]))source=lines[i++];
+  const skip=/^(Поделит|Читать|©|Собрани|Онлайн|Выберит|Анонимн|Единый|Нажми|Участник|Новичк|Большие|Все город|radioNA|Литрес|Youtube|Rutube|ВКонтакт|Дзен|Подкаст|Медитаци)/i;
+  while(i<lines.length){
+    const l=lines[i];
+    if(/^ТОЛЬКО СЕГОДНЯ/i.test(l)){
+      aff=l.replace(/^ТОЛЬКО СЕГОДНЯ[:\s]*/i,'').trim();
+      i++;
+      while(i<lines.length&&lines[i].length>10&&!skip.test(lines[i]))aff+=' '+lines[i++];
+      break;
+    }
+    if(l.length>50&&!skip.test(l))body.push(l);
+    i++;
+  }
+  return{title,quote,source,body:body.slice(0,7),aff};
+}
+
+function render({title,quote,source,body,aff}){
+  document.getElementById('main').innerHTML=`
+    <div class="date-row">
+      <div class="date-pill">${df}</div>
+    </div>
+    ${quote?`<div class="quote-card">
+      <div class="quote-label">Цитата дня</div>
+      <div class="quote-text">${quote}</div>
+      ${source?`<div class="quote-source">${source}</div>`:''}
+    </div>`:''}
+    <div class="body-card">
+      <div class="body-text" id="body">${body.map(p=>`<p>${p}</p>`).join('')}</div>
+    </div>
+    ${aff?`<div class="aff-card">
+      <div class="aff-label">Только сегодня</div>
+      <div class="aff-text" id="afft">${aff}</div>
+    </div>`:''}
+    <div class="actions">
+      <button class="act-btn" onclick="copyText()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        Копировать
+      </button>
+      <button class="act-btn" onclick="shareText()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Поделиться
+      </button>
+    </div>
+    <div style="text-align:center;padding:4px 0 8px;font-size:10px;color:var(--dim);letter-spacing:.1em">na-russia.org</div>`;
+}
+
+function loadSettings(){
+  const fs=localStorage.getItem('na_fs')||'16';
+  const lh=localStorage.getItem('na_lh')||'1.75';
+  const fi=parseInt(localStorage.getItem('na_font')||'0');
+  const ti=parseInt(localStorage.getItem('na_theme')||'0');
+  document.documentElement.style.setProperty('--fs',fs+'px');
+  document.documentElement.style.setProperty('--lh',lh);
+  document.documentElement.style.setProperty('--ff',FONTS[fi]);
+  document.body.className=THEMES[ti];
+  document.getElementById('fsr').value=fs;
+  document.getElementById('lhr').value=lh;
+  document.getElementById('fsv').textContent=fs+'px';
+  document.getElementById('lhv').textContent=parseFloat(lh).toFixed(2);
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  document.getElementById('f'+fi)?.classList.add('on');
+  document.querySelectorAll('.sw').forEach(s=>s.classList.remove('on'));
+  document.getElementById('t'+ti)?.classList.add('on');
+}
+function setFS(v){document.documentElement.style.setProperty('--fs',v+'px');document.getElementById('fsv').textContent=v+'px';localStorage.setItem('na_fs',v)}
+function setLH(v){document.documentElement.style.setProperty('--lh',v);document.getElementById('lhv').textContent=parseFloat(v).toFixed(2);localStorage.setItem('na_lh',v)}
+function setFont(i,el){document.documentElement.style.setProperty('--ff',FONTS[i]);document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');localStorage.setItem('na_font',i)}
+function setTheme(i,el){document.body.className=THEMES[i];document.querySelectorAll('.sw').forEach(s=>s.classList.remove('on'));el.classList.add('on');localStorage.setItem('na_theme',i)}
+function openPanel(){document.getElementById('panel').classList.add('on');document.getElementById('ovl').classList.add('on');document.getElementById('sbtn').classList.add('on')}
+function closePanel(){document.getElementById('panel').classList.remove('on');document.getElementById('ovl').classList.remove('on');document.getElementById('sbtn').classList.remove('on')}
+function copyText(){
+  const q=document.querySelector('.quote-text')?.innerText||'';
+  const b=document.getElementById('body')?.innerText||'';
+  const a=document.getElementById('afft')?.innerText||'';
+  navigator.clipboard.writeText(`${df}\n\n«${q}»\n\n${b}\n\nТолько сегодня: ${a}`).then(()=>showToast('Скопировано ✓')).catch(()=>showToast('Ошибка'));
+}
+function shareText(){
+  const q=document.querySelector('.quote-text')?.innerText||'';
+  const t=`«${q}»\n\nЕжедневные размышления АН — ${ds}`;
+  if(navigator.share)navigator.share({title:'Ежедневник АН',text:t});
+  else navigator.clipboard.writeText(t).then(()=>showToast('Скопировано ✓'));
+}
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2800)}
+window.addEventListener('scroll',()=>{const t=document.body.scrollHeight-innerHeight;document.getElementById('bar').style.transform=`scaleX(${t>0?scrollY/t:0})`;},({passive:true}));
+
+loadSettings();
+loadToday();
+</script>
+</body>
+</html>
