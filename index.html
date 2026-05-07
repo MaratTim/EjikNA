@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="АН Ежедневник">
+<title>Ежедневник · АН</title>
+
+<!-- Иконка: синий круг NA — как настоящий логотип АН -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%232563a8'/%3E%3Ctext x='50' y='62' text-anchor='middle' font-family='Arial Black,Arial,sans-serif' font-size='40' font-weight='900' fill='white'%3ENA%3C/text%3E%3C/svg%3E">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue: #2563a8;
+  --blue-light: #e8f0fb;
+  --blue-mid: #4a80c4;
+  --bg: #f5f7fa;
+  --white: #ffffff;
+  --border: #e2e8f0;
+  --text: #1a202c;
+  --text-mid: #4a5568;
+  --text-dim: #a0aec0;
+  --fs: 17px;
+  --lh: 1.8;
+  --ff: 'Inter', system-ui, sans-serif;
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--ff);
+  min-height: 100dvh;
+  font-size: var(--fs);
+  line-height: var(--lh);
+}
+
+/* HEADER */
+.hdr {
+  position: fixed; top:0; left:0; right:0; z-index:80;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  height: 56px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06);
+}
+.logo {
+  display: flex; align-items: center; gap: 10px;
+}
+/* Настоящий логотип АН — синий круг с NA */
+.na-logo {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--blue);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.na-logo span {
+  color: white; font-weight: 900; font-size: 13px;
+  font-family: 'Arial Black', Arial, sans-serif;
+  letter-spacing: -0.5px;
+}
+.logo-text { line-height: 1.2; }
+.logo-title {
+  font-size: 14px; font-weight: 700; color: var(--blue);
+  letter-spacing: -0.01em;
+}
+.logo-sub {
+  font-size: 10px; color: var(--text-dim); font-weight: 400;
+}
+.hdr-date {
+  font-size: 12px; font-weight: 600; color: var(--blue);
+  background: var(--blue-light);
+  padding: 4px 10px; border-radius: 20px;
+}
+.settings-ico {
+  width: 36px; height: 36px; border-radius: 8px;
+  background: none; border: none; cursor: pointer;
+  color: var(--text-dim);
+  display: flex; align-items: center; justify-content: center;
+  transition: all .2s;
+}
+.settings-ico:hover, .settings-ico.on {
+  background: var(--blue-light); color: var(--blue);
+}
+
+/* PROGRESS */
+.bar {
+  position: fixed; top: 56px; left:0; right:0; height: 3px; z-index:79;
+  background: var(--blue);
+  transform-origin: left; transform: scaleX(0);
+  transition: transform .08s linear;
+}
+
+/* MAIN */
+main { padding: 68px 14px 100px; }
+
+/* DATE BADGE */
+.date-badge {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 12px;
+}
+.date-pill {
+  background: var(--blue);
+  color: white; font-size: 12px; font-weight: 600;
+  padding: 5px 14px; border-radius: 20px;
+  letter-spacing: 0.02em;
+}
+.date-full {
+  font-size: 12px; color: var(--text-dim);
+}
+
+/* CARD */
+.card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,.05);
+  animation: fadeUp .4s ease both;
+}
+@keyframes fadeUp {
+  from { transform: translateY(12px); opacity:0; }
+  to { transform: translateY(0); opacity:1; }
+}
+
+/* QUOTE SECTION */
+.quote-section {
+  background: var(--blue);
+  padding: 20px 18px 18px;
+}
+.quote-label {
+  font-size: 10px; font-weight: 600; letter-spacing: .15em;
+  text-transform: uppercase; color: rgba(255,255,255,.6);
+  margin-bottom: 10px;
+}
+.quote-text {
+  font-size: calc(var(--fs) * 1.05);
+  font-weight: 500; color: white;
+  line-height: 1.5;
+  font-style: italic;
+}
+.quote-source {
+  margin-top: 10px;
+  font-size: 11px; font-weight: 600;
+  color: rgba(255,255,255,.55);
+  letter-spacing: .05em; text-transform: uppercase;
+}
+
+/* BODY SECTION */
+.body-section {
+  padding: 20px 18px 4px;
+  font-size: var(--fs);
+  line-height: var(--lh);
+  color: var(--text);
+  font-family: var(--ff);
+  transition: font-size .2s, line-height .2s, font-family .2s;
+}
+.body-section p { margin-bottom: 1em; }
+.body-section p:last-child { margin-bottom: 0; }
+
+/* AFFIRMATION */
+.aff-section {
+  margin: 12px 18px 18px;
+  background: var(--blue-light);
+  border-left: 3px solid var(--blue);
+  border-radius: 0 8px 8px 0;
+  padding: 12px 14px;
+}
+.aff-label {
+  font-size: 10px; font-weight: 700; letter-spacing: .15em;
+  text-transform: uppercase; color: var(--blue);
+  margin-bottom: 6px;
+}
+.aff-text {
+  font-size: calc(var(--fs) * 0.95);
+  color: var(--text-mid); line-height: 1.6;
+  font-style: italic;
+}
+
+/* ACTIONS */
+.actions {
+  border-top: 1px solid var(--border);
+  padding: 12px 18px;
+  display: flex; gap: 8px; align-items: center;
+}
+.act-btn {
+  display: flex; align-items: center; gap: 5px;
+  background: none; border: 1px solid var(--border);
+  border-radius: 20px; padding: 7px 14px;
+  color: var(--text-mid); font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: all .2s; font-family: var(--ff);
+}
+.act-btn:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-light); }
+.ml { margin-left: auto; }
+.act-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: none; border: 1px solid var(--border);
+  color: var(--text-dim); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .2s;
+}
+.act-icon:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-light); }
+
+.src-note {
+  text-align: center; margin-top: 10px;
+  font-size: 10px; color: var(--text-dim);
+  letter-spacing: .05em;
+}
+
+/* OVERLAY + PANEL */
+.ovl {
+  position: fixed; inset:0; z-index:90;
+  background: rgba(0,0,0,.35);
+  opacity:0; pointer-events:none; transition: opacity .3s;
+}
+.ovl.on { opacity:1; pointer-events:all; }
+.panel {
+  position: fixed; bottom:0; left:0; right:0; z-index:100;
+  background: var(--white);
+  border-top: 1px solid var(--border);
+  border-radius: 20px 20px 0 0;
+  padding: 0 18px 36px;
+  transform: translateY(100%);
+  transition: transform .35s cubic-bezier(.32,.72,0,1);
+  box-shadow: 0 -4px 20px rgba(0,0,0,.08);
+}
+.panel.on { transform: translateY(0); }
+.handle {
+  width: 36px; height: 4px; border-radius: 2px;
+  background: var(--border); margin: 12px auto 18px;
+}
+.panel-title {
+  font-size: 11px; font-weight: 700; letter-spacing: .15em;
+  text-transform: uppercase; color: var(--blue);
+  margin-bottom: 20px;
+}
+.s-row { margin-bottom: 18px; }
+.s-label {
+  font-size: 11px; font-weight: 600; color: var(--text-mid);
+  margin-bottom: 10px; display: flex; justify-content: space-between;
+  text-transform: uppercase; letter-spacing: .06em;
+}
+.s-label span { color: var(--blue); font-weight: 700; }
+input[type=range] {
+  width:100%; height:4px; -webkit-appearance:none; appearance:none;
+  background: var(--border); border-radius:2px; outline:none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance:none; width:22px; height:22px; border-radius:50%;
+  background: var(--blue); cursor:pointer;
+  border: 3px solid white;
+  box-shadow: 0 0 0 1px var(--blue);
+}
+.chips { display:flex; gap:8px; }
+.chip {
+  flex:1; padding:8px 4px; border-radius:10px;
+  border: 1.5px solid var(--border); background: none;
+  color: var(--text-mid); cursor:pointer; transition: all .2s;
+  text-align:center; font-size:13px; font-family: var(--ff);
+}
+.chip.on {
+  background: var(--blue); color: white;
+  border-color: var(--blue); font-weight: 600;
+}
+.themes { display:flex; gap:8px; flex-wrap: wrap; }
+.sw {
+  width:44px; height:44px; border-radius:12px;
+  cursor:pointer; border: 2px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  font-size:18px; transition: all .2s;
+}
+.sw.on { border-color: var(--blue); transform: scale(1.1); box-shadow: 0 0 0 2px var(--blue-light); }
+
+/* TOAST */
+.toast {
+  position:fixed; top:66px; left:50%;
+  transform: translateX(-50%) translateY(-8px);
+  background: var(--blue); color: white;
+  border-radius:20px; padding: 8px 18px;
+  font-size:13px; font-weight:600;
+  opacity:0; pointer-events:none; z-index:200;
+  transition: all .3s; white-space:nowrap;
+  box-shadow: 0 4px 12px rgba(37,99,168,.3);
+}
+.toast.on { opacity:1; transform: translateX(-50%) translateY(0); }
+
+/* THEMES */
+body.sepia {
+  --bg: #faf8f4; --white: #fffdf8; --border: #e8e0d0;
+  --text: #2d2416; --text-mid: #5c4d38; --text-dim: #a89880;
+  --blue: #7c5c2e; --blue-light: #f5ede0; --blue-mid: #a07840;
+}
+body.dark {
+  --bg: #0f1117; --white: #1a1d27; --border: #2d3148;
+  --text: #e8eaf0; --text-mid: #9099b8; --text-dim: #5a6080;
+  --blue: #4a80c4; --blue-light: #1a2540; --blue-mid: #6a9fd4;
+}
+body.green {
+  --bg: #f2f7f4; --white: #ffffff; --border: #d4e6da;
+  --text: #1a2e22; --text-mid: #3d6b4f; --text-dim: #82a890;
+  --blue: #2d7a4f; --blue-light: #e4f2ea; --blue-mid: #4a9a6a;
+}
+</style>
+</head>
+<body>
+
+<div class="bar" id="bar"></div>
+<div class="toast" id="toast"></div>
+
+<header class="hdr">
+  <div class="logo">
+    <!-- Настоящий логотип АН: синий круг с NA -->
+    <div class="na-logo"><span>NA</span></div>
+    <div class="logo-text">
+      <div class="logo-title">Ежедневник</div>
+      <div class="logo-sub">Анонимные Наркоманы</div>
+    </div>
+  </div>
+  <div class="hdr-date" id="hdate"></div>
+  <button class="settings-ico" id="sbtn" onclick="openPanel()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+    </svg>
+  </button>
+</header>
+
+<main>
+  <div class="date-badge">
+    <div class="date-pill" id="sday"></div>
+    <div class="date-full" id="sfull"></div>
+  </div>
+
+  <div class="card">
+    <div class="quote-section">
+      <div class="quote-label">Цитата дня</div>
+      <div class="quote-text">Со временем к нам придет способность не напрягаться и получать удовольствие от атмосферы выздоровления</div>
+      <div class="quote-source">Базовый текст, стр. 69</div>
+    </div>
+
+    <div class="body-section" id="body">
+      <p>Представьте, что новичок пришел на собрание и увидел там группу угрюмых людей, вцепившихся побелевшими от напряжения пальцами в подлокотники своих кресел. Этот новичок, наверное, пустился бы наутек, бормоча себе под нос: «А я-то думал, что смогу слезть с наркотиков и быть счастливым».</p>
+      <p>К счастью, наших новичков обычно встречает группа дружелюбных, улыбающихся людей, очевидно вполне удовлетворенных той жизнью, которую они нашли в Анонимных Наркоманах. Какую огромную надежду это дает!</p>
+      <p>Для новичков, а нередко и для тех, кто уже давно находится в программе, веселье и радость в выздоровлении могут казаться чем-то недосягаемым. Мы столько лет употребляли, что порой забыли, как вообще получать удовольствие от жизни без наркотиков.</p>
+      <p>Однако с течением времени — по мере того, как мы работаем по шагам и участвуем в жизни сообщества — приходит что-то новое: способность смеяться, расслабляться и по-настоящему радоваться. Это не происходит мгновенно, но это происходит.</p>
+      <p>Выздоровление — это не только отказ от наркотиков. Это обретение новой жизни, в которой есть место и радости, и дружбе, и настоящим чувствам. И это стоит того, чтобы остаться.</p>
+    </div>
+
+    <div class="aff-section">
+      <div class="aff-label">Только сегодня</div>
+      <div class="aff-text" id="afft">Только сегодня я позволю себе улыбнуться и порадоваться тому хорошему, что есть в моей жизни. Я помню, что радость в выздоровлении реальна.</div>
+    </div>
+
+    <div class="actions">
+      <button class="act-btn" onclick="copyText()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        Копировать
+      </button>
+      <button class="act-btn" onclick="shareText()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Поделиться
+      </button>
+      <button class="act-icon ml" onclick="window.open('https://na-russia.org/meditations','_blank')" title="Открыть сайт">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="src-note">na-russia.org · 6 мая 2026</div>
+</main>
+
+<div class="ovl" id="ovl" onclick="closePanel()"></div>
+<div class="panel" id="panel">
+  <div class="handle"></div>
+  <div class="panel-title">Настройки чтения</div>
+
+  <div class="s-row">
+    <div class="s-label">Размер шрифта <span id="fsv">17px</span></div>
+    <input type="range" id="fsr" min="14" max="26" value="17" oninput="setFS(this.value)">
+  </div>
+
+  <div class="s-row">
+    <div class="s-label">Межстрочный интервал <span id="lhv">1.8</span></div>
+    <input type="range" id="lhr" min="1.3" max="2.5" step="0.1" value="1.8" oninput="setLH(this.value)">
+  </div>
+
+  <div class="s-row">
+    <div class="s-label">Шрифт</div>
+    <div class="chips">
+      <button class="chip" id="f0" style="font-family:'Inter',sans-serif" onclick="setFont(0,this)">Inter</button>
+      <button class="chip" id="f1" style="font-family:Georgia,serif" onclick="setFont(1,this)">Georgia</button>
+      <button class="chip" id="f2" style="font-family:'Inter',sans-serif;font-style:italic" onclick="setFont(2,this)">Курсив</button>
+    </div>
+  </div>
+
+  <div class="s-row">
+    <div class="s-label">Тема</div>
+    <div class="themes">
+      <div class="sw" id="t0" style="background:#f5f7fa" onclick="setTheme(0,this)" title="Светлая">☀️</div>
+      <div class="sw" id="t1" style="background:#faf8f4" onclick="setTheme(1,this)" title="Сепия">📜</div>
+      <div class="sw" id="t2" style="background:#0f1117" onclick="setTheme(2,this)" title="Тёмная">🌙</div>
+      <div class="sw" id="t3" style="background:#f2f7f4" onclick="setTheme(3,this)" title="Зелёная">🌿</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const MO=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+const DA=['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'];
+const FONTS=["'Inter',system-ui,sans-serif","Georgia,serif","Georgia,serif"];
+const THEMES=['','sepia','dark','green'];
+
+const d=new Date();
+const ds=`${d.getDate()} ${MO[d.getMonth()]}`;
+const df=`${DA[d.getDay()]}, ${d.getDate()} ${MO[d.getMonth()]} ${d.getFullYear()}`;
+document.getElementById('hdate').textContent=ds;
+document.getElementById('sday').textContent=ds;
+document.getElementById('sfull').textContent=df;
+
+// ── ЗАГРУЗКА НАСТРОЕК ──
+function loadSettings(){
+  const fs = localStorage.getItem('na_fs') || '17';
+  const lh = localStorage.getItem('na_lh') || '1.8';
+  const fi = parseInt(localStorage.getItem('na_font') ?? '0');
+  const ti = parseInt(localStorage.getItem('na_theme') ?? '0');
+
+  document.documentElement.style.setProperty('--fs', fs+'px');
+  document.documentElement.style.setProperty('--lh', lh);
+  let ff = FONTS[fi];
+  if(fi===2) document.documentElement.style.setProperty('--ff', 'Georgia,serif');
+  else document.documentElement.style.setProperty('--ff', ff);
+  // курсив для body применяется иначе — через класс
+  document.getElementById('body').style.fontStyle = fi===2 ? 'italic' : 'normal';
+  document.body.className = THEMES[ti];
+
+  document.getElementById('fsr').value = fs;
+  document.getElementById('lhr').value = lh;
+  document.getElementById('fsv').textContent = fs+'px';
+  document.getElementById('lhv').textContent = parseFloat(lh).toFixed(1);
+
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  document.getElementById('f'+fi)?.classList.add('on');
+  document.querySelectorAll('.sw').forEach(s=>s.classList.remove('on'));
+  document.getElementById('t'+ti)?.classList.add('on');
+}
+
+function setFS(v){
+  document.documentElement.style.setProperty('--fs',v+'px');
+  document.getElementById('fsv').textContent=v+'px';
+  localStorage.setItem('na_fs',v);
+}
+function setLH(v){
+  document.documentElement.style.setProperty('--lh',v);
+  document.getElementById('lhv').textContent=parseFloat(v).toFixed(1);
+  localStorage.setItem('na_lh',v);
+}
+function setFont(i,el){
+  const ff = FONTS[i];
+  document.documentElement.style.setProperty('--ff', i===2 ? 'Georgia,serif' : ff);
+  document.getElementById('body').style.fontStyle = i===2 ? 'italic' : 'normal';
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  localStorage.setItem('na_font',i);
+}
+function setTheme(i,el){
+  document.body.className=THEMES[i];
+  document.querySelectorAll('.sw').forEach(s=>s.classList.remove('on'));
+  el.classList.add('on');
+  localStorage.setItem('na_theme',i);
+}
+
+function openPanel(){document.getElementById('panel').classList.add('on');document.getElementById('ovl').classList.add('on');document.getElementById('sbtn').classList.add('on')}
+function closePanel(){document.getElementById('panel').classList.remove('on');document.getElementById('ovl').classList.remove('on');document.getElementById('sbtn').classList.remove('on')}
+
+function copyText(){
+  const q=document.querySelector('.quote-text').innerText;
+  const b=document.getElementById('body').innerText;
+  const a=document.getElementById('afft').innerText;
+  navigator.clipboard.writeText(`${df}\n\n«${q}»\n\n${b}\n\nТолько сегодня: ${a}`)
+    .then(()=>showToast('Скопировано ✓')).catch(()=>showToast('Ошибка'));
+}
+function shareText(){
+  const q=document.querySelector('.quote-text').innerText;
+  const t=`«${q}»\n\nЕжедневные размышления АН — ${ds}`;
+  if(navigator.share) navigator.share({title:'АН Ежедневник',text:t});
+  else navigator.clipboard.writeText(t).then(()=>showToast('Скопировано ✓'));
+}
+function showToast(m){
+  const t=document.getElementById('toast');
+  t.textContent=m; t.classList.add('on');
+  setTimeout(()=>t.classList.remove('on'),2200);
+}
+
+window.addEventListener('scroll',()=>{
+  const tot=document.body.scrollHeight-innerHeight;
+  document.getElementById('bar').style.transform=`scaleX(${tot>0?scrollY/tot:0})`;
+},{passive:true});
+
+loadSettings();
+</script>
+
+<script>
+// ── АВТООБНОВЛЕНИЕ ТЕКСТА С САЙТА АН ──
+async function loadToday() {
+  const proxies = [
+    'https://corsproxy.io/?',
+    'https://api.allorigins.win/raw?url=',
+  ];
+  const url = 'https://na-russia.org/meditation-today';
+
+  for (const proxy of proxies) {
+    try {
+      const res = await fetch(proxy + encodeURIComponent(url));
+      if (!res.ok) continue;
+      const text = await res.text();
+      const parsed = parseNA(text);
+      if (parsed) { applyContent(parsed); return; }
+    } catch(e) { continue; }
+  }
+  // Если не загрузилось — оставляем вшитый текст
+}
+
+function parseNA(html) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  ['script','style','nav','header','footer'].forEach(t =>
+    doc.querySelectorAll(t).forEach(el => el.remove())
+  );
+
+  const container = doc.querySelector('article') ||
+                    doc.querySelector('.view-content') ||
+                    doc.querySelector('main') ||
+                    doc.querySelector('.content') ||
+                    doc.body;
+
+  const raw = container.innerText || container.textContent || '';
+  const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
+  const MO = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+  const dateRe = new RegExp('^\\d{1,2}\\s+(' + MO.join('|') + ')$','i');
+
+  let i = 0;
+  let date = '', quote = '', source = '', body = [], aff = '';
+
+  while (i < lines.length && !dateRe.test(lines[i])) i++;
+  if (i < lines.length) date = lines[i++];
+
+  while (i < lines.length && lines[i].length < 5) i++;
+  if (i < lines.length) quote = lines[i++].replace(/^[«"']+|[»"']+$/g,'').trim();
+  if (i < lines.length && lines[i].length < 80) source = lines[i++];
+
+  while (i < lines.length) {
+    const l = lines[i];
+    if (/^ТОЛЬКО СЕГОДНЯ/i.test(l)) {
+      aff = l.replace(/^ТОЛЬКО СЕГОДНЯ[:\s]*/i,'').trim();
+      i++;
+      while (i < lines.length && lines[i].length > 10 && !/^Поделит/i.test(lines[i])) {
+        aff += ' ' + lines[i++];
+      }
+      break;
+    }
+    if (l.length > 40 && !/^Поделит/i.test(l) && !/^Читать/i.test(l) && !/^©/i.test(l)) {
+      body.push(l);
+    }
+    i++;
+  }
+
+  if (body.length === 0) return null;
+  return { date, quote, source, body, aff };
+}
+
+function applyContent({ date, quote, source, body, aff }) {
+  if (date) {
+    document.getElementById('sday').textContent = date;
+  }
+  if (quote) {
+    document.querySelector('.qt').textContent = quote;
+  }
+  if (source) {
+    document.querySelector('.qs').textContent = source;
+  }
+  if (body.length > 0) {
+    document.getElementById('body').innerHTML = body.map(p => `<p>${p}</p>`).join('');
+  }
+  if (aff) {
+    document.getElementById('afft').textContent = aff;
+  }
+}
+
+// Загружаем при старте
+loadToday();
+</script>
+</body>
+</html>
