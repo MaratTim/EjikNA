@@ -1,0 +1,7 @@
+{
+  "version": 2,
+  "routes": [
+    { "src": "/api/meditation", "dest": "/api/meditation.js" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
+}
